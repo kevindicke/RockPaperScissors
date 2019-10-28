@@ -11,7 +11,8 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var showAlert = false
-    @State private var rps = ["Rock", "Paper", "Scissors"].shuffled()
+    @State private var rps = ["Rock", "Paper", "Scissors"]
+    @State private var shouldWin = Bool.random()
     @State private var computerPicker = Int.random(in: 0...2)
     @State private var scoreTitle = ""
     @State private var score = 0
@@ -21,16 +22,20 @@ struct ContentView: View {
         ZStack{
             Color.green
                 .edgesIgnoringSafeArea(.all)
-            VStack(spacing:25){
+            VStack(spacing:20){
                 Text("Rock Paper Scissors")
                     .foregroundColor(.white)
                     .font(.title)
                     .fontWeight(.bold)
+                VStack(spacing:5){
+                    FontStyle(text:"Computer picked \(rps[computerPicker])")
+                        .padding(1)
+                    FontStyle(text:"You should \(shouldWin ? "Win" : "Lose")")
+                        .padding(1)
+                }
                 ForEach(0..<3){ number in
                     Button(action: {
-                        print("Click \(self.rps[number])")
-                        self.rpsPicked(playerPicked: self.rps[number])
-                        print("Computer picked \(self.computerPicker)")
+                        self.checkRound(thePlayPicked: self.rps[number])
                     }){
                         VStack(spacing:0){
                             ImageStyle(image: self.rps[number])
@@ -44,18 +49,106 @@ struct ContentView: View {
             }
             .alert(isPresented: $showAlert) {
                 Alert(title: Text(scoreTitle), message: Text("Your score: \(score)"), dismissButton: .default(Text("Ok")){
-                    self.newRound()
+                    self.round < 10 ? self.newRound() : self.newGame()
                 })
             }
         }
     }
-    func rpsPicked(playerPicked pick: String){
+    func checkRound(thePlayPicked pick: String){
+        let draw = "Draw!!!!"
+        let win = "You win this round!"
+        let lose = "Nope! Better luck next time.."
+        print(pick)
+        print(shouldWin)
+        print(rps[computerPicker])
         
-        showAlert = true
+        if pick == rps[computerPicker] {
+            scoreTitle = draw
+            showAlert = true
+        }
+        else if rps[computerPicker] == "Rock" && shouldWin {
+            if pick == "Paper" {
+                scoreTitle = win
+                score += 1
+                showAlert = true
+            }
+            else {
+                scoreTitle = lose
+                score -= 1
+                showAlert = true
+            }
+        }
+        else if rps[computerPicker] == "Rock" && shouldWin == false {
+            if pick == "Paper" {
+                scoreTitle = lose
+                score -= 1
+                showAlert = true
+            }
+            else {
+                scoreTitle = win
+                score += 1
+                showAlert = true
+            }
+        }
+        else if rps[computerPicker] == "Paper" && shouldWin {
+            if pick == "Scissors" {
+                scoreTitle = win
+                score += 1
+                showAlert = true
+            }
+            else {
+                scoreTitle = lose
+                score -= 1
+                showAlert = true
+            }
+        }
+        else if rps[computerPicker] == "Paper" && shouldWin == false {
+            if pick == "Scissors" {
+                scoreTitle = lose
+                score -= 1
+                showAlert = true
+            }
+            else {
+                scoreTitle = win
+                score += 1
+                showAlert = true
+            }
+        }
+        else if rps[computerPicker] == "Scissors" && shouldWin {
+            if pick == "Rock" {
+                scoreTitle = win
+                score += 1
+                showAlert = true
+            }
+            else {
+                scoreTitle = lose
+                score -= 1
+                showAlert = true
+            }
+        }
+        else if rps[computerPicker] == "Scissors" && shouldWin == false {
+            if pick == "Rock" {
+                scoreTitle = lose
+                score -= 1
+                showAlert = true
+            }
+            else {
+                scoreTitle = win
+                score += 1
+                showAlert = true
+            }
+        }
+        
     }
     func newRound (){
-        rps.shuffle()
         computerPicker = Int.random(in: 0...2)
+        shouldWin = Bool.random()
+        round += 1
+    }
+    func newGame(){
+        newRound()
+        score = 0
+        round = 1
     }
 }
 
